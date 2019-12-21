@@ -1,9 +1,6 @@
 zsh-scmbreeze
 =============
 
-Build
------
-
 |Build Status| |GitHub issues| |GitHub license|
 
 :Version: 0.0.0
@@ -27,6 +24,7 @@ Dependencies
 
     https://github.com/mafredri/zsh-async
     https://github.com/marzocchi/zsh-notify
+    https://github.com/luismayta/zsh-functions
 
 Installation
 ------------
@@ -188,4 +186,3 @@ Made with :coffee: and :pizza: by `luis mayta`_ and `hadenlabs`_.
 
 .. _Pyenv: https://github.com/pyenv/pyenv
 .. _Docker: https://www.docker.com/
-.. _Docker Compose: https://docs.docker.com/compose/
