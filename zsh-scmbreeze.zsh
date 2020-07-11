@@ -9,7 +9,7 @@
 #
 
 
-PATH_SCM_BREEZE=$HOME/.scm_breeze
+PATH_SCM_BREEZE=${HOME}/.scm_breeze
 
 df_command_exists() (
     if alias "$1" >/dev/null 2>&1; then
@@ -43,7 +43,7 @@ function scmbreeze::install::async {
 
 function scmbreeze::install::factory {
     if df_command_exists async_start_worker; then
-        scm_breeze::install::async
+        scmbreeze::install::async
     else
         scmbreeze::install
     fi
