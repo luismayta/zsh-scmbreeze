@@ -24,7 +24,7 @@ function scmbreeze::install {
         message_info "not found git, please install git"
     fi
     message_info "Installing SCMBREEZE"
-    git clone git://github.com/scmbreeze/scm_breeze.git "${PATH_SCM_BREEZE}"
+    git clone https://github.com/scmbreeze/scm_breeze.git "${PATH_SCM_BREEZE}"
     "${PATH_SCM_BREEZE}/install.sh"
     zstyle ':notify:*' success-title "Finished install dependences"
 }
