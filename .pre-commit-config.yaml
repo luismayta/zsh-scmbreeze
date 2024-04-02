@@ -1,107 +1,97 @@
-default_language_version:
-  # force all unspecified python hooks to run python3
-  python: python3.8.0
+ci:
+  autoupdate_schedule: monthly
+
+default_stages:
+  - commit
+exclude: >
+  (?x)^(
+    ^(\/|)vendor\/(.*?)$|
+    .+\.node_modules\/.*$|
+    .+\.external_modules.*$|
+    .+\.terraform.*$|
+    .+\.venv.*$|
+    .+\.lock$|
+  )$
 
 repos:
-  - repo: https://github.com/pre-commit/pre-commit
-    rev: v1.20.0
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.5
     hooks:
-      - id: validate_manifest
-  - repo: https://github.com/detailyang/pre-commit-shell
-    rev: 1.0.5
-    hooks:
-      - id: shell-lint
-        exclude: (^provision/script/wait-for-it.sh$|^provision/git/hooks/prepare-commit-msg$)
+      - id: codespell
         args:
-          - --exclude=SC1072,SC1073,SC2068
-  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
-    rev: v1.1.0
+          - --ignore-words=.ci/linters/.codespell-ignores
+        exclude: >
+          (?x)^(
+            .+\.vendor\/.*$|
+            .+\.node_modules\/.*$|
+            .+\.sops.*$|
+            .+\.lock$|
+            go.mod|
+            go.sum|
+          )$
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.5.0
     hooks:
-      - id: python-safety-dependencies-check
-  - repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
-    rev: v1.0.4
-    hooks:
-      - id: python-bandit-vulnerability-check
-        args: []
-        files: .py$
-  - repo: https://github.com/Lucas-C/pre-commit-hooks-nodejs
-    rev: v1.1.0
-    hooks:
-      - id: markdown-toc
-  - repo: https://github.com/Lucas-C/pre-commit-hooks-markup
-    rev: v1.0.0
-    hooks:
-      - id: rst-linter
-        exclude: (docs/*|tests/*)
-  - repo: https://github.com/pre-commit/mirrors-pylint
-    rev: v2.4.4
-    hooks:
-      - id: pylint
-        exclude: __pycache__|migrations|conf.py|_build|.tox|pootle/static|pootle/translations|pootle/locale|pootle/assets|templates
+      - id: commitlint
+        stages: [commit-msg]
+        additional_dependencies: ["@hadenlabs/commitlint-config"]
         args:
-          - --rcfile=.pylintrc
-          - --disable=no-name-in-module,import-error,ungrouped-imports
-          - --ignore=settings_test, migrations
-  - repo: https://github.com/ambv/black
-    rev: 19.10b0
-    hooks:
-      - id: black
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.7.9
-    hooks:
-      - id: flake8
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.740
-    hooks:
-      - id: mypy
-        args:
-          - --ignore-missing-imports
+          - --config=.ci/linters/.commitlintrc.json
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.4.0
+    rev: v4.4.0
     hooks:
       - id: detect-private-key
         files: ^(?!\.?git-crypt)
+        exclude: >
+          (?x)^(
+            .+\.gitleaks.toml$|
+          )$
       - id: check-merge-conflict
-      - id: trailing-whitespace
-        files: ^tf|-|\.(py|tfvars|tf|tfenv|env|yml|yaml|pem|key|mock)$
-      - id: end-of-file-fixer
-        files: ^tf|-|\.(py|env|yml|yaml|pem|key|mock)$
       - id: check-added-large-files
         files: ^tf|-|\.(py|env|yml|yaml)$
       - id: check-case-conflict
       - id: check-json
       - id: check-xml
       - id: check-yaml
-      - id: check-case-conflict
+        args:
+          - --allow-multiple-documents
       - id: check-byte-order-marker
       - id: check-ast
       - id: debug-statements
       - id: check-docstring-first
-      - id: detect-aws-credentials
       - id: requirements-txt-fixer
       - id: check-symlinks
-      - id: name-tests-test
-        exclude: (src/tests/steps/*)
-        args:
-          - --django
       - id: file-contents-sorter
       - id: fix-encoding-pragma
       - id: sort-simple-yaml
-      - id: mixed-line-ending
-        fix: lr
-      - id: check-executables-have-shebangs
-  - repo: https://github.com/asottile/blacken-docs
-    rev: v1.3.0
+  - repo: https://github.com/hadenlabs/pre-commit-hooks
+    rev: e50751c9323b0a03f27271c57513f5c389f6591b
     hooks:
-      - id: blacken-docs
-        additional_dependencies:
-          - black
-  - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.21.0
-    hooks:
-      - id: terraform_fmt
-      - id: terraform_docs
-  - repo: https://github.com/prettier/prettier
-    rev: 1.19.1 # Use the sha or tag you want to point at
-    hooks:
-      - id: prettier
+      - id: do-not-commit
+      - id: markdown-link-check
+        args:
+          - --config=.ci/linters/markdown-link-config.json
+        exclude: >
+          (?x)^(
+            .+\.docs/env-vars.md$|
+            docs/env-vars.md$|
+            docs\/include\/terraform.md$|
+            .+\.tpl.md$|
+          )$
+
+      - id: shellcheck
+        exclude: >
+          (?x)^(
+            .+\.provision/git/hooks/prepare-commit-msg$|
+            .+\.tpl.sh$|
+          )$
+        args:
+          - --exclude=SC1072,SC1073,SC2068
+      - id: gitleaks
+        args:
+          - --path=.
+          - --repo-config-path=.ci/linters/.gitleaks.toml
+          - --verbose
+      - id: hadolint
+        args:
+          - --config=.ci/linters/.hadolint.yaml
